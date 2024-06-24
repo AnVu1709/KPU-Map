@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My location and distance to KPU Surrey Library</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+    <h1>My location and distance to KPU Surrey Library</h1>
+    <div id="map"></div>
+    <p id="distance"></p>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const KPULibraryCoords = [49.187500, -122.849000]; // KPU Surrey Library Coordinates
+
+        const map = L.map('map').setView([0, 0], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const KPUMarker = L.marker(KPULibraryCoords).addTo(map)
+            .bindPopup('KPU Surrey Library')
+            .openPopup();
+
+        // user's location
+        navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            const userCoords = [latitude, longitude];
+
+            const userMarker = L.marker(userCoords).addTo(map)
+                .bindPopup('Your Location')
+                .openPopup();
+
+            // map view of user's location
+            map.setView(userCoords, 13);
+
+            // the distance to KPU Surrey Library
+            const distance = calculateDistance(latitude, longitude, KPULibraryCoords[0], KPULibraryCoords[1]);
+            document.getElementById('distance').textContent = `Distance to KPU Surrey Library: ${distance.toFixed(2)} km`;
+        });
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const toRad = (value) => (value * Math.PI) / 180;
+            const R = 6371; // Radius of the Earth
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; 
+        }
+    </script>
+</body>
+</html>
